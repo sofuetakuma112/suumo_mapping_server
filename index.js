@@ -24,13 +24,7 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 db.once("open", () => console.log("DB connection successful"));
 
 const app = express();
-const server = http.createServer(app);
-const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:3000", "https://suumo-mapping.netlify.app"],
-    methods: ["GET", "POST"],
-  },
-});
+// const server = http.createServer(app);
 
 app.use(
   cors({
@@ -355,4 +349,11 @@ app.post("/api/mapping", async (req, res, next) => {
   });
 });
 
-server.listen(process.env.PORT || 3001);
+const server = app.listen(process.env.PORT || 3001);
+
+const io = new Server(server, {
+  cors: {
+    origin: ["http://localhost:3000", "https://suumo-mapping.netlify.app"],
+    methods: ["GET", "POST"],
+  },
+});
