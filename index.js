@@ -38,6 +38,7 @@ const server = http.createServer(app);
 const io = new Server(server, {
   cors: {
     origin: ["http://localhost:3000", "https://suumo-mapping.netlify.app"],
+    methods: ["GET", "POST"],
   },
 });
 
@@ -123,7 +124,7 @@ app.get("/", (req, res, next) => {
   res.status(200).send({
     message: "this is sample api route",
   });
-})
+});
 
 app.post("/api/mapping", async (req, res, next) => {
   if (Object.keys(req.body).length === 0) {
