@@ -24,6 +24,13 @@ db.on("error", console.error.bind(console, "MongoDB connection error:"));
 db.once("open", () => console.log("DB connection successful"));
 
 const app = express();
+const server = http.createServer(app);
+const io = new Server(server, {
+  cors: true,
+  origin: ["http://localhost:3000", "https://suumo-mapping.netlify.app"],
+  methods: ["GET", "POST"],
+});
+
 app.use(
   cors({
     origin: ["http://localhost:3000", "https://suumo-mapping.netlify.app"], //アクセス許可するオリジン
@@ -32,15 +39,6 @@ app.use(
   })
 );
 app.use(express.json()); // body-parser settings
-
-const server = http.createServer(app);
-
-const io = new Server(server, {
-  cors: {
-    origin: ["http://localhost:3000", "https://suumo-mapping.netlify.app"],
-    methods: ["GET", "POST"],
-  },
-});
 
 /* 以後、アプリケーション固有の処理 */
 
