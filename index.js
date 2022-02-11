@@ -37,13 +37,11 @@ const server = http.createServer(app);
 
 const io = new Server(server, {
   cors: {
-    origin: "*",
+    origin: ["http://localhost:3000", "https://suumo-mapping.netlify.app"],
   },
 });
 
-server.listen(process.env.PORT || 3001);
-
-/* 3. 以後、アプリケーション固有の処理 */
+/* 以後、アプリケーション固有の処理 */
 
 const sleep = (ms) => {
   return new Promise((resolve) => setTimeout(resolve, ms));
@@ -356,3 +354,5 @@ app.post("/api/mapping", async (req, res, next) => {
     data: propertyInfos,
   });
 });
+
+server.listen(process.env.PORT || 3001);
