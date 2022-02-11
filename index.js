@@ -121,6 +121,12 @@ const getLocationByGoogleMaps = async (address) => {
   return location;
 };
 
+app.get("/", (req, res, next) => {
+  res.status(200).send({
+    message: "this is sample api route",
+  });
+})
+
 app.post("/api/mapping", async (req, res, next) => {
   if (Object.keys(req.body).length === 0) {
     res.status(200);
