@@ -26,9 +26,10 @@ db.once("open", () => console.log("DB connection successful"));
 const app = express();
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: true,
-  origin: ["http://localhost:3000", "https://suumo-mapping.netlify.app"],
-  methods: ["GET", "POST"],
+  cors: {
+    origin: ["http://localhost:3000", "https://suumo-mapping.netlify.app"],
+    methods: ["GET", "POST"],
+  },
 });
 
 app.use(
