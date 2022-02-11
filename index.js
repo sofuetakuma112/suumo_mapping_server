@@ -35,7 +35,7 @@ const io = new Server(server, {
   },
 });
 
-server.listen(3001);
+server.listen(process.env.PORT || 3001);
 
 /* 3. 以後、アプリケーション固有の処理 */
 
