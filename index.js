@@ -9,7 +9,7 @@ import xml2js from "xml2js";
 import { Client } from "@googlemaps/google-maps-services-js";
 import mongoose from "mongoose";
 import { Coordinate } from "./models/coordinate.js";
-import { countSpaces } from "./modules/util.js";
+import { countSpaces, countWords } from "./modules/util.js";
 import { Server } from "socket.io";
 
 dotenv.config();
@@ -163,15 +163,29 @@ app.post("/api/mapping", async (req, res, next) => {
     return srcProperty.jsonValue();
   };
 
+  const autoScroll = async (page) => {
+    await page.evaluate(async () => {
+      await new Promise((resolve, reject) => {
+        let totalHeight = 0;
+        let distance = 100;
+        let timer = setInterval(() => {
+          let scrollHeight = document.body.scrollHeight;
+          window.scrollBy(0, distance);
+          totalHeight += distance;
+          if (totalHeight >= scrollHeight) {
+            clearInterval(timer);
+            resolve();
+          }
+        }, 10);
+      });
+    });
+  };
+
   // トータルのページ数を取得する
   const navigationElemHandlers = await page.$$("ol.pagination-parts > li > a");
   const totalPageLength = await getTextContentFromElemHandler(
     navigationElemHandlers[navigationElemHandlers.length - 1]
   );
-  // for (const elem of navigationElemHandlers) {
-  //   console.log(totalPageLength);
-  // }
-
   const extractInfoFromSinglePage = async (page) => {
     const elems = await page.$$("ul.l-cassetteitem > li");
 
@@ -191,7 +205,7 @@ app.post("/api/mapping", async (req, res, next) => {
         // 画像URL
         let imgSrc = "";
         try {
-          const imgElemHandler = await elem.$(".js-linkImage");
+          const imgElemHandler = await elem.$("img.js-linkImage");
           imgSrc = await getSrcFromElemHandler(imgElemHandler);
         } catch (error) {
           imgSrc = "";
@@ -201,7 +215,7 @@ app.post("/api/mapping", async (req, res, next) => {
         const titleElemHandler = await elem.$("div.cassetteitem_content-title");
         const title = await getTextContentFromElemHandler(titleElemHandler);
 
-        if (countSpaces(title) > 1) {
+        if (countSpaces(title) > 1 && countWords(title) > 2) {
           console.log(`不正なタイトル: ${title}`);
           return null;
         }
@@ -316,6 +330,8 @@ app.post("/api/mapping", async (req, res, next) => {
   while (true) {
     // 現在のページから物件情報を抽出する
     console.log(`${currentPageNum}ページ: 物件情報を抽出する`);
+    // ページ最下部まで一度スクロールする
+    await autoScroll(page);
     const [propertyInfosPerPage, nextElemHandler] =
       await extractInfoFromSinglePage(page);
     propertyInfos = [...propertyInfos, ...propertyInfosPerPage];
@@ -335,7 +351,7 @@ app.post("/api/mapping", async (req, res, next) => {
       currentPageNum += 1;
       // https://qiita.com/monaka_ben_mezd/items/4cb6191458b2d7af0cf7
       await page.waitForNavigation({ waitUntil: ["load", "networkidle2"] });
-      // await sleep(5000);
+      await sleep(1000);
     } else break;
   }
 
